@@ -1,4 +1,17 @@
-﻿using UnityEngine;
+﻿/*
+ * GenerateGalaxy.cs
+ *
+ * Copyright (C) 2015 Erik Kalkoken
+ *
+ * Generates all galaxy 3D objects in space at startup based on CCP's map data
+ *
+ * HISTORY
+ * 18-FEB-2016 v1.1 Performance improvements by introducing static batching for all solar systen spheres
+ * 13-DEC-2015 v0.1 Initial version
+ *
+**/
+
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,27 +43,16 @@ public class GenerateGalaxy : MonoBehaviour
 				}
 		
 				public int RegionID { get; set; }
-
 				public int ConstellationID  { get; set; }
-
 				public int SolarSystemID { get; set; }
-
 				public string SolarSystemName { get; set; }
-
 				public float Luminosity { get; set; }
-
 				public bool IsHub { get; set; }
-
 				public bool IsRegional { get; set; }
-
 				public int FactionID { get; set; }
-
 				public Vector3 Position { get; set; }	// coordinates are stored after downscaling is applied
-				
 				public float Sec { get; set; }
-
 				public Transform Trf  { get; set; }
-
 				public Material colorMat  { get; set; }
 		};
 
@@ -59,38 +61,24 @@ public class GenerateGalaxy : MonoBehaviour
 		class Region
 		{
 				public int RegionID { get; set; }
-
 				public string RegionName  { get; set; }
-
 				public Vector3 Position  { get; set; }
-
 				public Color Col  { get; set; }
-
 				public int FactionID  { get; set; }
-
 				public GameObject Go  { get; set; }
-		
 				public GameObject GoLabel  { get; set; }
-
 				public GameObject JumpsGo  { get; set; }
-
 				public Mesh JumpsMesh  { get; set; }
-
 				public Material JumpsMat  { get; set; }
-
 				public Material SystemMat  { get; set; }
 		};
 		
 		class Faction
 		{
 				public int FactionID { get; set; }
-			
 				public string FactionName  { get; set; }
-			
 				public Color Col  { get; set; }
-		
 				public Vector3 Position { get; set; }	// coordinates are stored after downscaling is applied
-
 				public GameObject GoLabel  { get; set; }
 		
 		}
