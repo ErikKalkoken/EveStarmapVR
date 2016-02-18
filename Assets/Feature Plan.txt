@@ -1,0 +1,71 @@
+Feature plan
+
+Version 0.1
+- Show all star systems of the Eve galaxy (except WH systems)
+- Color systems based on security status
+- Fly around freely with keyboard, mouse and joypad
+- Fixed sec colors for some systems
+- Show system names for nearest systems or show name for selected system with crosshair
+- Show startup screen with copyright notice and re-center notification
+- Color systems based on regions and factions
+- Color systems based on actual sun brightness
+- Show jump lines between star systems (previous performance issue fixed)
+- FIXED Generating the jump lines takes a very long time
+- Show region names
+- FIXED Text overlays all objects (new solution seams to be a little slower though)
+- FIXED Frame rate improced by using low poly spheres for solar systems
+- Enable on-screen menu to toogle view options (e.g. system color scheme)
+- Upgraded to Unity 4.6 Free
+- Option to disable region names
+- Option to disable music
+- Full flight control inkl. rotation as alternative control scheme
+- Text always readible from player camera (dynamic rotation)
+- Remove flight control
+- "Please wait" text while building galaxy
+- Simplified welcome screen
+- DONE - Test if keybord and mouse input still works after tweaking the OVRplayer controller
+- 2 quads for jump connection to improve visibility of connections
+- Use Eve colors in welcome screen and option menu
+- Write readme file
+
+Version 0.2
+- Use gameobjects for jump connection for performance improvement and easier handling
+
+Version 0.3
+- FIXED: Major performance improvements for galaxy generation and game performance by reducing number of jumps
+- FIXED: Frame rate drop in some situations
+- Neutral jump color changed (was too bright)
+- New option: jumps can be colored by region or races
+- Number of materials in scene reduced to further improve performance
+
+Version 0.4 (CURRENT)
+- Alternative view mode implemented for high quality screenshots
+- Implementation for system colors does not yet work
+- FIXED: Fix the null reference exceptions at OnTrigger / LabelTrigger
+- Option to display faction names in space
+
+Bugs / Know issues
+- Option menu does not yet work in alternative view mode
+- Right stick and d-pad does not work in alternate mode
+
+Feature plan for Current version
+- Fully functional alternative view mode
+- Enable OVR Main Menu for main scene
+
+Planned features
+- Optical enhanced option menu with border, title and seperation lines to group items
+- Enable search for star systems
+- Display live data from Eve Online (e.g. kills, jumps, pilots per system)
+- Read default settings from XML config file
+- Refactor arrays into hashtable and lists
+- Display real color of solar systems
+- Show constellation names
+- Show names of races in space
+- Upgrade to new Unity GUI 
+- Update to OVR 0.4.4
+- Use OVR Main Menu to enable display of frame rate etc.
+
+Deferred features
+- Use SQLite in application for all data (not found a working solution yet, using arrays as workarounds)
+- Load screen with progress while galaxy is beeing build
+

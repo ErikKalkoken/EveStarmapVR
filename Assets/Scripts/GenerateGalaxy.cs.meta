@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2682883c4be63a447893b7231bebf6db
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - mapSolarSystemsCSV: {fileID: 4900000, guid: ccffcbdbb30b8464aa15201b99776be9,
+      type: 3}
+  - mapSolarSystemJumpsCSV: {fileID: 4900000, guid: 8ecb616654489cd489787c98716cbf9f,
+      type: 3}
+  - shader: {instanceID: 0}
+  - solarSystemPrefab: {fileID: 400000, guid: 80f597f25e619db4cbfe5d1103d70412, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
