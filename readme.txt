@@ -1,10 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 ! Name: 	Eve Galaxy Viewer
-! Version:	0.5
+! Version:	0.6.1
 ! System:	Windows PC with Oculus Rift DK2
 ! Author:	Erik Kalkoken
 ----------------------------------------------------------------------------------------------------
-
+! History:
+! 2016-02-18 v0.6.1 Performanc improvements
+! 2016-02-17 v0.6.0 Migrated to Unity 5 and SDK 0.8.0
+----------------------------------------------------------------------------------------------------
 
 1. Summary
 ----------------------------------------------
@@ -86,9 +89,9 @@ For reference this demo has been developed and tested with the following system 
 - Windows 7 64-Bit
 - Intel i7-4770K, 16 GB RAM
 - Oculus Rift DK2
-- NVIDIA GTX 770
-- Oculus PC SDK 0.4.3 Beta
-- Unity 4.6 free
+- NVIDIA GTX 970
+- Oculus PC SDK 0.8.0 Beta
+- Unity 5.3.2 Personal Edition
 
 
 6. Sources
@@ -97,7 +100,7 @@ Data - Eve Online Static Data Export and based on Phoebe_1.0.
 Music - "CYAN 010 | Smooth Genestar - The Source" by CYAN MUSIC. It can be found here: https://soundcloud.com/cyan-music/smooth-genestar-the-source
 
 
-6. Disclaimer / Legal
+7. Disclaimer / Legal
 ----------------------------------------------
 All data used in this demo belongs to CCP and is used in accordance to the "Developer License Agreement" as defined on https://developers.eveonline.com/resource/license-agreement.
 For the data the following applies: © 2014 CCP hf. All rights reserved. "EVE", "EVE Online", "CCP", and all related logos and images are trademarks or registered trademarks of CCP hf. 
@@ -108,8 +111,7 @@ This demo is provided free of charge and with no rights reserved (with exception
 This demo is provided without any warranty and to be used on your own risk.
 
 
-
-7. Contact
+8. Contact
 ----------------------------------------------
 For any questions regarding this demo please feel free to contact the author.
 
@@ -118,8 +120,9 @@ Please see the contact details below:
 In-game:	Erik Kalkoken
 Email:		erik.kalkoken@gmail.com
 Facebook:	Erik Kalkoken
+Website:	http://kalkoken.altervista.org/ (including link to download exe)
+Blog:		http://kalkoken.altervista.org/blog/
 
 
 Erik Kalkoken
-Dezember 2014
-
+February 2016
