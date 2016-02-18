@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
-! Name: 	Eve Galaxy Viewer
+! Name: Eve Galaxy Viewer
 ! Version:	0.6.1
 ! System:	Windows PC with Oculus Rift DK2
 ! Author:	Erik Kalkoken
@@ -24,13 +24,11 @@ Features:
 - Works on both Oculus Rifs and normal screen
 - Atmospheric background music is played
 
-
 2. About this demo
 ----------------------------------------------
 I am an active Eve Online player so one of my main motivations was to see the Eve galaxy in VR. As far as I know this is the first demo to provide this. Since this is my first project with Unity it was also a great opportunity to learn about the tool and scripting in C#. 
 
 I am planning to further improve this demo in the future and would very much welcome your feedback.
-
 
 3. Controls
 ----------------------------------------------
@@ -72,7 +70,6 @@ D-PAD Left/Right	Switch between options
 A-Button		Choose current option
 B-Button		Close the option menu
 
-
 4. Performance
 ----------------------------------------------
 The demo has been build with performance in mind and is running with smooth 75Hz most of the time on the reference system. 
@@ -81,10 +78,8 @@ Please be aware though that judder will most likely occur in situation with very
 
 While generating the galaxy on startup the screen will freeze. This is normal behavior - just wait a few seconds until the galaxy is ready. This takes about 5-6 seconds on the reference system.
 
-
 5. Reference system
 ----------------------------------------------
-
 For reference this demo has been developed and tested with the following system configuration:
 - Windows 7 64-Bit
 - Intel i7-4770K, 16 GB RAM
@@ -93,22 +88,19 @@ For reference this demo has been developed and tested with the following system 
 - Oculus PC SDK 0.8.0 Beta
 - Unity 5.3.2 Personal Edition
 
-
 6. Sources
 ----------------------------------------------
 Data - Eve Online Static Data Export and based on Phoebe_1.0.
 Music - "CYAN 010 | Smooth Genestar - The Source" by CYAN MUSIC. It can be found here: https://soundcloud.com/cyan-music/smooth-genestar-the-source
 
-
-7. Disclaimer / Legal
+7. Legal
 ----------------------------------------------
 All data used in this demo belongs to CCP and is used in accordance to the "Developer License Agreement" as defined on https://developers.eveonline.com/resource/license-agreement.
-For the data the following applies: © 2014 CCP hf. All rights reserved. "EVE", "EVE Online", "CCP", and all related logos and images are trademarks or registered trademarks of CCP hf. 
+For the data the following applies: Â© 2014 CCP hf. All rights reserved. "EVE", "EVE Online", "CCP", and all related logos and images are trademarks or registered trademarks of CCP hf. 
 
 The music is licenced under CC BY NC SA. Please see link for licence details: http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-This demo is provided free of charge and with no rights reserved (with exception of the rights reserved by CPP as stated above).
-This demo is provided without any warranty and to be used on your own risk.
+This application is licende under the MIT licence - with the exception of material owned by CCP and CYAN MUSIC as mentioned above. See attache licence file for details.
 
 
 8. Contact
