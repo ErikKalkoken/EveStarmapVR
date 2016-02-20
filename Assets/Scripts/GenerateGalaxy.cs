@@ -14,6 +14,7 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 
 public class GenerateGalaxy : MonoBehaviour
@@ -38,10 +39,6 @@ public class GenerateGalaxy : MonoBehaviour
 		// Store data about all solor systems
 		class SolarSystem
 		{
-				public SolarSystem ()
-				{			
-				}
-		
 				public int RegionID { get; set; }
 				public int ConstellationID  { get; set; }
 				public int SolarSystemID { get; set; }
@@ -54,6 +51,7 @@ public class GenerateGalaxy : MonoBehaviour
 				public float Sec { get; set; }
 				public Transform Trf  { get; set; }
 				public Material colorMat  { get; set; }
+				public int kills { get; set; }
 		};
 
 
@@ -149,6 +147,7 @@ public class GenerateGalaxy : MonoBehaviour
 																
 				GenerateRegions ();
 				GenerateSolarSystems ();
+				RetrieveSystemDetails ();
 				GenerateJumps ();
 				GenerateFactions ();
 
@@ -508,10 +507,6 @@ public class GenerateGalaxy : MonoBehaviour
 								
 				
 								// Draw one star system
-								//							GameObject sphere = GameObject.CreatePrimitive (PrimitiveType.Sphere);
-				
-				
-								//								GameObject sphere = GameObject.Instantiate(Resources.Load("SimpleSphere")) as GameObject;
 								GameObject sphere = GameObject.Instantiate (spherePrefab) as GameObject;
 				
 								// GameObject name at runtime is name of system
@@ -559,26 +554,11 @@ public class GenerateGalaxy : MonoBehaviour
 				}
 				
 
-		// enforce static batching for region trees (only works with Unity Pro though
-		foreach (Region region in regions.Values) 
-		{
-			StaticBatchingUtility.Combine (region.Go); // Optimze tree of star systems for performance
-		}					
-
-				///////////////
-				// Add color information to solar systems
-				/////////////
-/*		
-		// Load details for solarSystems from file
-		string[,] sysdetailsgrid = CSVReader.SplitCsvGrid (detailsSolarSystemsCSV.text); // loading map of star systems
-		int sysdetailsrows = sysgrid.GetUpperBound (1);
-		
-		for (int i=0; i<sysdetailsrows; i++)
-		{
-		
-		}
-		
-*/			
+				// enforce static batching for region trees (only works with Unity Pro though
+				foreach (Region region in regions.Values) 
+				{
+					StaticBatchingUtility.Combine (region.Go); // Optimze tree of star systems for performance
+				}					
 		}
 	
 		/// <summary>
@@ -696,8 +676,60 @@ public class GenerateGalaxy : MonoBehaviour
 		
 		}
 	
-	
-	
+		private void RetrieveSystemDetails ()
+		{
+				EveApi.initHttps();
+
+				Dictionary<int, int> systemDetails = new Dictionary<int, int>();
+
+				// load current kill stats
+				systemDetails = EveApi.getJumps();
+
+				// attach info to solarSystems
+				foreach (SolarSystem system in solarSystems.Values) 
+				{
+						int solarSystemId = system.SolarSystemID;
+						int kills = systemDetails.ContainsKey(solarSystemId) ? systemDetails[solarSystemId] : 0;
+						solarSystems[solarSystemId].kills = kills;
+
+						// add kills to label
+						Transform label = system.Trf.GetChild(0);
+						TextMesh textMesh = label.GetComponent<TextMesh>();
+						textMesh.text += " (" + kills + ")";
+				}
+
+
+				var query = systemDetails.OrderByDescending (item => item.Value);
+				int counter = 0;
+				int max = 50;
+				Material highlightMat = new Material(Shader.Find("Legacy Shaders/Transparent/Diffuse"));
+				// Material highlightMat = new Material(Shader.Find("Standard"));
+				// highlightMat.EnableKeyword("_ALPHATEST_ON");
+
+				if (highlightMat  != null)
+				{
+					highlightMat.color = new Color(0F, 1F, 0F, 0.7F);
+
+					foreach (KeyValuePair<int,int> item in query)
+					{ 
+							int solarSystemId = item.Key;
+
+							if (solarSystems.ContainsKey(solarSystemId))
+							{
+								GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+								sphere.transform.position = solarSystems[solarSystemId].Position;
+								// float radius = 0.1f * item.Value;
+								float radius = 0.003f * item.Value;
+								sphere.transform.localScale = new Vector3(radius, radius, radius);
+								sphere.transform.GetComponent<Renderer>().material = highlightMat;
+								sphere.isStatic = true;								// set as static to improvce performance
+								
+								if (++counter > max) break;
+							}
+					}
+				}
+
+		}
 	
 		// *******************************
 		// * Support methods
@@ -801,8 +833,6 @@ public class GenerateGalaxy : MonoBehaviour
 				}		
 		}
 	
-	
-	
 		/// <summary>
 		/// Paints the solar system with regional color scheme
 		/// </summary>
@@ -813,7 +843,6 @@ public class GenerateGalaxy : MonoBehaviour
 						go.GetComponent<Renderer>().material = regions [sol.RegionID].SystemMat;
 			
 				}
-		
 		}
 
 		/// <summary>
