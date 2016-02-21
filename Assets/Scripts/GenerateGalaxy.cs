@@ -95,8 +95,10 @@ public class GenerateGalaxy : MonoBehaviour
 		private int updateCounter = 1;		// counter to manage number of calls to rotation adjustments to labels
 		private const int updateLabelRotationFrameCount = 3; // Text rotation will be updated every 3rd frame - performance tweak
 
-		private Dictionary<int,int> pvpkills;
-		private Dictionary<int,int> jumps;
+		private Dictionary<int,int> systemTopKills;	// sorted lookup table for top kills with systemId, kills
+		private Dictionary<int,int> systemTopJumps; // sorted lookup table for top jumps with systemId, jumps
+		enum SystemStatsType { none, kills, jumps };
+		private Stack highlightSpehres;
 
 		// Faction IDs
 		private const int factionIdMin = 500000;
@@ -110,6 +112,7 @@ public class GenerateGalaxy : MonoBehaviour
 		private Material system05SecMat;
 		private Material systemLowSecMat;
 		private Material systemNullSecMat;
+		private Material systemDetailsMat;
 		private Dictionary<int,Material> systemsFactionMat;
 		private Dictionary<int,Material> jumpsFactionMat;
 		private Dictionary<char,Material> solarColorMat;
@@ -119,7 +122,12 @@ public class GenerateGalaxy : MonoBehaviour
 		//////////////////////////////////////////////////////
 		// Public methods
 		//////////////////////////////////////////////////////
-		
+
+		GenerateGalaxy()
+		{
+			highlightSpehres = new Stack();	
+		}
+
 		public void Start ()
 		{
 				labelShortlist = new Dictionary<string,GameObject> ();
@@ -153,6 +161,7 @@ public class GenerateGalaxy : MonoBehaviour
 				GenerateRegions ();
 				GenerateSolarSystems ();
 				RetrieveSystemDetails ();
+				ShowSystemDetails(SystemStatsType.kills);
 				GenerateJumps ();
 				GenerateFactions ();
 
@@ -685,43 +694,59 @@ public class GenerateGalaxy : MonoBehaviour
 		}
 
 		/// <summary>
-		/// Retrieves current kills and jumps per system from Eve API
+		/// Retrieves current kills and jumps per system from Eve API and store them for later use
 		/// </summary>
 		private void RetrieveSystemDetails ()
 		{
 				EveApi.initHttps();
 
-				Dictionary<int, int> systemDetails = new Dictionary<int, int>();
+				Dictionary<int, int> systemKills = new Dictionary<int, int>();
+				Dictionary<int, int> systemJumps = new Dictionary<int, int>();
 
-				// load current kill stats
-				systemDetails = EveApi.getJumps();
+				// load current system stats from EveApi
+				systemJumps = EveApi.getJumps();
+				systemKills = EveApi.getKills();
 
 				// attach info to solarSystems
 				foreach (SolarSystem system in solarSystems.Values) 
 				{
 						int solarSystemId = system.SolarSystemID;
-						int kills = systemDetails.ContainsKey(solarSystemId) ? systemDetails[solarSystemId] : 0;
-						solarSystems[solarSystemId].kills = kills;
-
-						// add kills to label
-						Transform label = system.Trf.GetChild(0);
-						TextMesh textMesh = label.GetComponent<TextMesh>();
-						textMesh.text += " (" + kills + ")";
+						solarSystems[solarSystemId].kills = systemKills.ContainsKey(solarSystemId) ? systemKills[solarSystemId] : 0;
+						solarSystems[solarSystemId].jumps = systemJumps.ContainsKey(solarSystemId) ? systemJumps[solarSystemId] : 0;
 				}
 
-
-				var query = systemDetails.OrderByDescending (item => item.Value);
-				int counter = 0;
+				// store lookup tables for top systems
 				int max = 50;
-				Material highlightMat = new Material(Shader.Find("Legacy Shaders/Transparent/Diffuse"));
-				// Material highlightMat = new Material(Shader.Find("Standard"));
-				// highlightMat.EnableKeyword("_ALPHATEST_ON");
+				systemTopKills = EveApi.getTop (systemKills, max);
+				systemTopJumps = EveApi.getTop (systemJumps, max);
+		}
 
-				if (highlightMat  != null)
-				{
-					highlightMat.color = new Color(0F, 1F, 0F, 0.7F);
+		/// <summary>
+		/// Show current kills or jumps per system from Eve API
+		/// </summary>
+		private void ShowSystemDetails (SystemStatsType statsType)
+		{
+			// remove previous highlight speheres
+			for (int i =0; i < highlightSpehres.Count; i++)
+			{
+				GameObject sphere = (GameObject) highlightSpehres.Pop();
+				Destroy(sphere);
+			}
 
-					foreach (KeyValuePair<int,int> item in query)
+			switch (statsType)
+			{
+				case SystemStatsType.kills:
+					// attach info to solarSystem labels
+					foreach (SolarSystem system in solarSystems.Values) 
+					{
+						int solarSystemId = system.SolarSystemID;
+
+						Transform label = system.Trf.GetChild(0);
+						TextMesh textMesh = label.GetComponent<TextMesh>();
+						textMesh.text = system.SolarSystemName + " (" + system.kills + ")";
+					}
+
+					foreach (KeyValuePair<int,int> item in systemTopKills)
 					{ 
 							int solarSystemId = item.Key;
 
@@ -729,17 +754,61 @@ public class GenerateGalaxy : MonoBehaviour
 							{
 								GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 								sphere.transform.position = solarSystems[solarSystemId].Position;
-								// float radius = 0.1f * item.Value;
-								float radius = 0.003f * item.Value;
+								float radius = 0.1f * item.Value;
 								sphere.transform.localScale = new Vector3(radius, radius, radius);
-								sphere.transform.GetComponent<Renderer>().material = highlightMat;
+								sphere.transform.GetComponent<Renderer>().material = systemDetailsMat;
 								sphere.isStatic = true;								// set as static to improvce performance
-								
-								if (++counter > max) break;
+
+								systemDetailsMat.color = new Color(1F, 0F, 0F, 0.7F);
+
+								// store current sphere on stack for later retrieval
+								highlightSpehres.Push (sphere);
 							}
 					}
-				}
+					break;
 
+				case SystemStatsType.jumps:
+					// attach info to solarSystem labels
+					foreach (SolarSystem system in solarSystems.Values) 
+					{
+						int solarSystemId = system.SolarSystemID;
+
+						Transform label = system.Trf.GetChild(0);
+						TextMesh textMesh = label.GetComponent<TextMesh>();
+						textMesh.text = system.SolarSystemName + " (" + system.jumps + ")";
+					}
+
+					foreach (KeyValuePair<int,int> item in systemTopJumps)
+					{ 
+							int solarSystemId = item.Key;
+
+							if (solarSystems.ContainsKey(solarSystemId))
+							{
+								GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+								sphere.transform.position = solarSystems[solarSystemId].Position;
+								float radius = 0.003f * item.Value;
+								sphere.transform.localScale = new Vector3(radius, radius, radius);
+								sphere.transform.GetComponent<Renderer>().material = systemDetailsMat;
+								sphere.isStatic = true;								// set as static to improvce performance
+
+								systemDetailsMat.color = new Color(0F, 1F, 0F, 0.7F);
+
+								// store current sphere on stack for later retrieval
+								highlightSpehres.Push (sphere);
+							}
+					}
+					break;
+
+				default:
+					// remove sytem details from Labels
+					foreach (SolarSystem system in solarSystems.Values) 
+					{
+						Transform label = system.Trf.GetChild(0);
+						TextMesh textMesh = label.GetComponent<TextMesh>();
+						textMesh.text = system.SolarSystemName;
+					}
+					break;
+			}
 		}
 	
 		// *******************************
@@ -800,6 +869,12 @@ public class GenerateGalaxy : MonoBehaviour
 				// Textmaterials and fonts
 //				fontBoldPrvMat = new Material (fontBoldMat);
 				fontRegPrvMat = new Material (fontRegMat);	
+
+				// systemDetails
+				systemDetailsMat = new Material(Shader.Find("Legacy Shaders/Transparent/Diffuse"));
+				systemDetailsMat.color = new Color(0F, 1F, 0F, 0.7F);
+				// systemDetailsMat = new Material(Shader.Find("Standard"));
+				// systemDetailsMat.EnableKeyword("_ALPHATEST_ON");
 		}
 /*
 	private void DrawLineLR (Vector3 start, Vector3 end)
