@@ -6,8 +6,9 @@
  * Generates all galaxy 3D objects in space at startup based on CCP's map data
  *
  * HISTORY
- * 18-FEB-2016 v1.1 Performance improvements by introducing static batching for all solar systen spheres
- * 13-DEC-2015 v0.1 Initial version
+ * 20-FEB-2016 v0.7.0 New: Shows current jumps/kills for each system
+ * 18-FEB-2016 v0.6.1 Performance improvements by introducing static batching for all solar systen spheres
+ * 13-DEC-2015 v0.1.0 Initial version
  *
 **/
 
@@ -52,6 +53,7 @@ public class GenerateGalaxy : MonoBehaviour
 				public Transform Trf  { get; set; }
 				public Material colorMat  { get; set; }
 				public int kills { get; set; }
+				public int jumps { get; set; }
 		};
 
 
@@ -92,11 +94,14 @@ public class GenerateGalaxy : MonoBehaviour
 		private Dictionary<string,GameObject> labelShortlist;	// Contains list of all visible labels to enable real-time rotation adjustment
 		private int updateCounter = 1;		// counter to manage number of calls to rotation adjustments to labels
 		private const int updateLabelRotationFrameCount = 3; // Text rotation will be updated every 3rd frame - performance tweak
-	
+
+		private Dictionary<int,int> pvpkills;
+		private Dictionary<int,int> jumps;
+
 		// Faction IDs
 		private const int factionIdMin = 500000;
 		private const int factionIdMax = 500020;
-	
+
 		// Predefined materials to improve performance
 		private Material jumpsBasisMat;				// Basis material for all other materials used for jumps
 		private Material systemBasisMat;			// Basis material for all other materials used for solar systems
@@ -621,7 +626,10 @@ public class GenerateGalaxy : MonoBehaviour
 						}
 				}
 		}
-	
+
+		/// <summary>
+		/// Generates faction labels in space
+		/// </summary>
 		private void GenerateFactions ()
 		{	
 				// Load region data from file
@@ -675,7 +683,10 @@ public class GenerateGalaxy : MonoBehaviour
 				}
 		
 		}
-	
+
+		/// <summary>
+		/// Retrieves current kills and jumps per system from Eve API
+		/// </summary>
 		private void RetrieveSystemDetails ()
 		{
 				EveApi.initHttps();
