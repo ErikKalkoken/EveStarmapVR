@@ -98,7 +98,7 @@ public class GenerateGalaxy : MonoBehaviour
 		private Dictionary<int,int> systemTopKills;	// sorted lookup table for top kills with systemId, kills
 		private Dictionary<int,int> systemTopJumps; // sorted lookup table for top jumps with systemId, jumps
 		enum SystemStatsType { none, kills, jumps };
-		private Stack highlightSpehres;
+		private GameObject highlightSpehres = null;
 
 		// Faction IDs
 		private const int factionIdMin = 500000;
@@ -125,7 +125,7 @@ public class GenerateGalaxy : MonoBehaviour
 
 		GenerateGalaxy()
 		{
-			highlightSpehres = new Stack();	
+			
 		}
 
 		public void Start ()
@@ -161,7 +161,6 @@ public class GenerateGalaxy : MonoBehaviour
 				GenerateRegions ();
 				GenerateSolarSystems ();
 				RetrieveSystemDetails ();
-				ShowSystemDetails(SystemStatsType.kills);
 				GenerateJumps ();
 				GenerateFactions ();
 
@@ -283,16 +282,31 @@ public class GenerateGalaxy : MonoBehaviour
 								}			
 								break;
 				
-			
-						case 4: // Display jump connections
+						case 4: // Show system details
+								switch (currentOpt [changedOptionIdx]) {				
+								case 0: // none
+										ShowSystemDetails (SystemStatsType.none);
+										break;
+						
+								case 1: // kills
+										ShowSystemDetails (SystemStatsType.kills);
+										break;			
+							
+								case 2: // jumps
+										ShowSystemDetails (SystemStatsType.jumps);
+										break;								
+								}	
+								break;
+				
+						case 5: // Display jump connections
 								if (currentOpt [changedOptionIdx] == 0) {
 										ToogleDisplayJumps (false);
 								} else {
 										ToogleDisplayJumps (true);
 								}			
 								break;
-				
-						case 5: // Turn music on/off
+
+						case 6: // Turn music on/off
 								if (currentOpt [changedOptionIdx] == 0) {
 										ToogleBackgroundMusic (false);
 								} else {
@@ -352,11 +366,9 @@ public class GenerateGalaxy : MonoBehaviour
 		/// </summary>
 		private void InitializeMenu ()
 		{
-				// Connect to OVR Player Controller to find SimpleVRMenu
-//		ovrPlayerController = GameObject.Find ("OVRPlayerController");
-		
 				// Define and initialize menu
 				if (playerController != null) {
+						// Connect to Player Controller to find SimpleVRMenu
 						simpleVRMenu = playerController.GetComponent ("SimpleVRMenu") as SimpleVRMenu;
 						customMenu = new CustomMenu ();
 			
@@ -373,6 +385,7 @@ public class GenerateGalaxy : MonoBehaviour
 								}, 0);
 								customMenu.AddItem ("Show region names", new string[] {"no", "yes"}, 1);
 								customMenu.AddItem ("Show faction names", new string[] {"no", "yes"}, 0);
+								customMenu.AddItem ("Show system details", new string[] {"none", "kills", "jumps"}, 0);
 								customMenu.AddItem ("Show jump connections", new string[] {"no", "yes"}, 1);
 								customMenu.AddItem ("Play background music", new string[] {"no", "yes"}, 1);
 								//		customMenu.AddItem ("Gamepad setup", new string[] {"standard", "flight control"}, 0);
@@ -727,10 +740,10 @@ public class GenerateGalaxy : MonoBehaviour
 		private void ShowSystemDetails (SystemStatsType statsType)
 		{
 			// remove previous highlight speheres
-			for (int i =0; i < highlightSpehres.Count; i++)
+			if (highlightSpehres != null)
 			{
-				GameObject sphere = (GameObject) highlightSpehres.Pop();
-				Destroy(sphere);
+				Destroy (highlightSpehres);
+				highlightSpehres = null;
 			}
 
 			switch (statsType)
@@ -746,6 +759,8 @@ public class GenerateGalaxy : MonoBehaviour
 						textMesh.text = system.SolarSystemName + " (" + system.kills + ")";
 					}
 
+					highlightSpehres = new GameObject("System Details");
+
 					foreach (KeyValuePair<int,int> item in systemTopKills)
 					{ 
 							int solarSystemId = item.Key;
@@ -757,14 +772,16 @@ public class GenerateGalaxy : MonoBehaviour
 								float radius = 0.1f * item.Value;
 								sphere.transform.localScale = new Vector3(radius, radius, radius);
 								sphere.transform.GetComponent<Renderer>().material = systemDetailsMat;
+								sphere.name = solarSystems[item.Key].SolarSystemName + "_kills";
 								sphere.isStatic = true;								// set as static to improvce performance
 
 								systemDetailsMat.color = new Color(1F, 0F, 0F, 0.7F);
 
 								// store current sphere on stack for later retrieval
-								highlightSpehres.Push (sphere);
+								sphere.transform.parent = highlightSpehres.transform;
 							}
 					}
+					StaticBatchingUtility.Combine (highlightSpehres);
 					break;
 
 				case SystemStatsType.jumps:
@@ -778,6 +795,8 @@ public class GenerateGalaxy : MonoBehaviour
 						textMesh.text = system.SolarSystemName + " (" + system.jumps + ")";
 					}
 
+					highlightSpehres = new GameObject("System Details");
+
 					foreach (KeyValuePair<int,int> item in systemTopJumps)
 					{ 
 							int solarSystemId = item.Key;
@@ -789,14 +808,16 @@ public class GenerateGalaxy : MonoBehaviour
 								float radius = 0.003f * item.Value;
 								sphere.transform.localScale = new Vector3(radius, radius, radius);
 								sphere.transform.GetComponent<Renderer>().material = systemDetailsMat;
+								sphere.name = solarSystems[item.Key].SolarSystemName + "_jumps";
 								sphere.isStatic = true;								// set as static to improvce performance
 
 								systemDetailsMat.color = new Color(0F, 1F, 0F, 0.7F);
 
 								// store current sphere on stack for later retrieval
-								highlightSpehres.Push (sphere);
+								sphere.transform.parent = highlightSpehres.transform;
 							}
 					}
+					StaticBatchingUtility.Combine (highlightSpehres);
 					break;
 
 				default:
