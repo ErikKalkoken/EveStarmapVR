@@ -33,8 +33,6 @@ public class SimpleVRMenu : MonoBehaviour
 	// Public methods
 	public void Awake ()
 	{
-		// ovrcontroler = this.GetComponentInParent<OVRPlayerController> ();
-
 		plycontroller = this.GetComponentInParent<PlayerController> ();	// Use alternative player controlle if OVR is not present
 		noOvrMode = false;
 

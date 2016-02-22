@@ -1,4 +1,18 @@
-﻿using UnityEngine;
+﻿/*
+ * CustomMenu.cs
+ *
+ * Copyright (C) 2015 Erik Kalkoken
+ *
+ * Helper class for storing and managing the data of the a menu and displaying it on the GUI
+ *
+ * HISTORY
+ * 21-FEB-2016 v0.3 Adjusted font size to accomodate additional menu entries
+ * 17-FEB-2016 v0.2 Adjustment due to migration to Unity 5
+ * 13-DEC-2015 v0.1 Initial version
+ *
+**/
+
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -168,8 +182,8 @@ public class CustomMenu {
 
 		borderX = 0;
 		borderY = 300;
-		normal.fontSize = 40;
-		highlight.fontSize = 40;		
+		normal.fontSize = 35;
+		highlight.fontSize = 35;		
 
 		GUILayout.BeginArea (new Rect (borderX, borderY, Screen.width-2*borderX, Screen.height-2*borderY));
 
