@@ -166,7 +166,7 @@ public class GenerateGalaxy : MonoBehaviour
 				GenerateSolarSystems ();
 				GenerateSystemStats ();
 				GenerateJumps ();
-				// GenerateFactions ();
+				GenerateFactions ();
 
 				// Paint solar systems with default color schema
 				PaintSystemsSec ();
@@ -896,7 +896,7 @@ public class GenerateGalaxy : MonoBehaviour
 		
 				if (ns == null) {
 						Debug.LogWarning ("Shader for Jump Connections not found");
-						ns = Shader.Find ("Self-Illumin/VertexLit");
+						ns = Shader.Find ("Legacy Shaders/Self-Illumin/VertexLit");
 				}		
 				jumpsBasisMat = new Material (ns);
 				jumpsBasisMat.color = MyColor.steelBlue;
@@ -917,12 +917,20 @@ public class GenerateGalaxy : MonoBehaviour
 				fontRegPrvMat = new Material (fontRegMat);	
 
 				// systemDetails
-				highlightJumpsMat = new Material(Shader.Find("Legacy Shaders/Transparent/Diffuse"));
-				highlightJumpsMat.color = new Color(0F, 1F, 0F, 0.7F);
+				Shader highlightShader = Shader.Find("Legacy Shaders/Transparent/Diffuse");
+				if (highlightShader != null)
+				{
+					highlightJumpsMat = new Material(highlightShader);
+					highlightJumpsMat.color = new Color(0F, 1F, 0F, 0.7F);
 
-				highlightKillsMat = new Material(Shader.Find("Legacy Shaders/Transparent/Diffuse"));
-				highlightKillsMat.color = new Color(1F, 0F, 0F, 0.7F);
-
+					highlightKillsMat = new Material(highlightShader);
+					highlightKillsMat.color = new Color(1F, 0F, 0F, 0.7F);
+				}
+				else
+				{
+					Debug.LogError ("Fatal Error: Shader 'Legacy Shaders/Transparent/Diffuse' not found");
+					Application.Quit();
+				}
 				// systemDetailsMat = new Material(Shader.Find("Standard"));
 				// systemDetailsMat.EnableKeyword("_ALPHATEST_ON");
 		}

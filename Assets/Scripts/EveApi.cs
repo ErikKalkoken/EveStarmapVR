@@ -76,13 +76,13 @@ public static class EveApi
 
 		if (type == SystemStatsType.kills)
 		{
-        	// url = eveXmlApiUrl + "/map/kills.xml.aspx";
-			url = "C:\\Users\\bji74\\Desktop\\kills.xml"; // for devlopment
+        	url = eveXmlApiUrl + "/map/kills.xml.aspx";
+			// url = "C:\\Users\\bji74\\Desktop\\kills.xml"; // for development
 		}
 		else
 		{
-			// url = eveXmlApiUrl + "/map/jumps.xml.aspx";
-			url = "C:\\Users\\bji74\\Desktop\\jumps.xml"; // for devlopment
+			url = eveXmlApiUrl + "/map/jumps.xml.aspx";
+			// url = "C:\\Users\\bji74\\Desktop\\jumps.xml"; // for development
 		}				
 
 		// Debug.Log("Loading page from url " + url);
@@ -164,7 +164,7 @@ public static class EveApi
 	/// </summary>
 	private static void FatalErrorOccured (string text, Exception ex)
     {
-        Debug.Log("Fatal error occured: " + text + " Exception: " + ex);
+        Debug.LogError("Fatal error occured: " + text + " Exception: " + ex);
 		Application.Quit();
     }
 
@@ -173,6 +173,6 @@ public static class EveApi
 	/// </summary>
 	private static void ErrorOccured (string text, Exception ex)
     {
-        Debug.Log("Error occured: " + text + " Exception: " + ex);
+        Debug.LogError("Error occured: " + text + " Exception: " + ex);
     }
 }
