@@ -1,10 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 ! Name: Eve Galaxy Viewer
-! Version:	0.6.1
+! Version:	0.7.0
 ! System:	Windows PC with Oculus Rift DK2
 ! Author:	Erik Kalkoken
 ----------------------------------------------------------------------------------------------------
 ! History:
+! 2016-02-22 v0.7.0 New feature: Show current kills and jump per system
 ! 2016-02-18 v0.6.1 Performance improvements
 ! 2016-02-17 v0.6.0 Migrated to Unity 5 and SDK 0.8.0
 ----------------------------------------------------------------------------------------------------
