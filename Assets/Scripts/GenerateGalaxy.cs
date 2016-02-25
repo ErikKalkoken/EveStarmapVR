@@ -36,6 +36,7 @@ public class GenerateGalaxy : MonoBehaviour
 		public float lineSize = 0.004f;	// Width of "line" in space drawn for jump connections
 		public float textVisibilityRange = 350f; 	// distance from player where labels are visible
 		public float sphereSize = 0.03f;
+		public AudioClip boom;
 		
 		// Store data about all solor systems
 		class SolarSystem
@@ -100,8 +101,11 @@ public class GenerateGalaxy : MonoBehaviour
 
 		private GameObject highlightKills = null;
 		private GameObject highlightJumps = null;
-
+		private GameObject killBublles = null;
 		private GameObject factionsRoot = null;
+
+		const int maxKillBubbles = 5;
+		private int numKillBubbles = 0;
 
 		// Faction IDs
 		private const int factionIdMin = 500000;
@@ -132,6 +136,9 @@ public class GenerateGalaxy : MonoBehaviour
 			
 		}
 
+		/// <summary>
+		/// Generate all gameobjects and run initializations at startup
+		/// </summary>
 		public void Start ()
 		{
 				labelShortlist = new Dictionary<string,GameObject> ();
@@ -183,8 +190,19 @@ public class GenerateGalaxy : MonoBehaviour
 				}
 		}
 
+		/// <summary>
+		/// Manage label rotation
+		/// </summary>
 		public void Update ()
 		{
+				// check for A-Button
+
+				if (Input.GetKeyDown (KeyCode.JoystickButton0)) 
+				{
+						if (numKillBubbles < maxKillBubbles) StartCoroutine ("startKillBubble");
+				}
+
+
 				// Execute rotation adjustment of labels only every nth frame to save drawcalls
 				if (updateCounter == updateLabelRotationFrameCount) {	
 						updateCounter = 1;	// reset counter
@@ -196,13 +214,58 @@ public class GenerateGalaxy : MonoBehaviour
 						}		
 				}
 				updateCounter++;
-		
-				// Exit Application with ESC Key
-				if (Input.GetKeyDown (KeyCode.Escape)) {
-						Application.Quit ();
-				}
-				
+						
 		}
+
+		IEnumerator startKillBubble ()
+		{
+				numKillBubbles++;
+
+				System.Random rnd = new System.Random();
+				float waitsecs = 0.02f;
+				float inc = 0.05f;
+				float radius = 0.1f * rnd.Next(10, 30);
+				int[] systems = {30000142, 30000145, 30000143, 30000143, 30000139, 30000144, 30000140};
+
+				// start kill bubble
+				int solarsystemId = systems[rnd.Next(0, 6)];
+				GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+				sphere.transform.position = solarSystems[solarsystemId].Position;	
+				sphere.transform.GetComponent<Renderer>().material = highlightKillsMat;
+				sphere.name = solarSystems[solarsystemId].SolarSystemName + "_killBubble";
+				AudioSource audio = sphere.AddComponent<AudioSource>() as AudioSource;
+				audio.clip = boom;
+				audio.Play();
+				// store current sphere on stack for later retrieval
+				sphere.transform.parent = killBublles.transform;
+
+				// sphere explosion
+				for (float r = 0.1f; r < radius; r += inc)
+				{
+					sphere.transform.localScale = new Vector3(r, r, r);
+					yield return new WaitForSeconds(waitsecs);
+				}
+
+				// let audio clip play to end
+				while (audio.isPlaying)
+				{
+					yield return new WaitForSeconds(waitsecs);
+				}
+
+				/*
+				// fade out sound
+				for (float v = 1f; v > 0f; v -= 0.1f)
+				{
+					audio.volume = v;
+					yield return new WaitForSeconds(waitsecs*2);
+				}
+				*/
+				audio.volume=0;
+				Destroy (sphere);
+				numKillBubbles--;
+		}
+
+
 
 		/// <summary>
 		/// Is called when the menu is closed to process the results
@@ -795,6 +858,9 @@ public class GenerateGalaxy : MonoBehaviour
 					StaticBatchingUtility.Combine (highlightJumps);
 					highlightJumps.SetActive (false);								// deactive for now
 				}
+
+				// create parent object for history kills
+				killBublles = new GameObject("Kills Bubbles");
 		}
 
 		/// <summary>

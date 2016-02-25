@@ -205,7 +205,7 @@ MonoBehaviour:
     type: 3}
   chrFactionsCSV: {fileID: 4900000, guid: 94b9275f3ab437f4482de516288ba4df, type: 3}
   generateGalaxy: 1
-  generateJumpLines: 1
+  generateJumpLines: 0
   shader: {fileID: 14, guid: 0000000000000000f000000000000000, type: 0}
   fontReg: {fileID: 12800000, guid: e7534a89fc8ffc94c8f69b79caf81cee, type: 3}
   fontRegMat: {fileID: 2100000, guid: 22993d214dea2ef42a63a3d6e5ceecfa, type: 2}
@@ -214,6 +214,7 @@ MonoBehaviour:
   lineSize: 0.01
   textVisibilityRange: 500
   sphereSize: 0.05
+  boom: {fileID: 8300000, guid: a1d49f9efcdbd364c8f50e65fe9ee750, type: 3}
 --- !u!4 &767817060
 Transform:
   m_ObjectHideFlags: 0
@@ -240,7 +241,7 @@ AudioSource:
   m_Volume: 0.313
   m_Pitch: 1
   Loop: 1
-  Mute: 0
+  Mute: 1
   Spatialize: 0
   Priority: 128
   DopplerLevel: 1
@@ -288,7 +289,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
-    m_RotationOrder: 4
+    m_RotationOrder: 0
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:

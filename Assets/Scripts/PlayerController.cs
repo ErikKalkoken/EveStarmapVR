@@ -25,7 +25,9 @@ public class PlayerController : MonoBehaviour
 	// START - Use this for initialization
 	void Start () {}
 	
-	// UPDATE is called once per frame
+	/// <summary>
+	/// Manage player movement based on input from gamepad and keyboard
+	/// </summary>
 	void Update () 
 	{
 		float boost = 0; 
@@ -60,7 +62,13 @@ public class PlayerController : MonoBehaviour
 		
 			float r = Input.GetAxis("RightH") * Time.smoothDeltaTime * rotation_speed * boost;			
 			transform.Rotate (Vector3.up * r);			
-		}		
+		}
+
+		// Exit Application with ESC Key
+		if (Input.GetKeyDown (KeyCode.Escape)) {
+			Application.Quit ();
+		}
+								
 	} 
 	
 	public void SetHaltUpdateMovement(bool toogle)
