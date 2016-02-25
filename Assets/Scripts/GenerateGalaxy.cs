@@ -37,7 +37,10 @@ public class GenerateGalaxy : MonoBehaviour
 		public float textVisibilityRange = 350f; 	// distance from player where labels are visible
 		public float sphereSize = 0.03f;
 		public AudioClip boom;
-		
+
+		// const
+		private const int WH_SOLAR_SYSTEM_ID = 31000000;
+
 		// Store data about all solor systems
 		class SolarSystem
 		{
@@ -104,8 +107,14 @@ public class GenerateGalaxy : MonoBehaviour
 		private GameObject killBublles = null;
 		private GameObject factionsRoot = null;
 
-		const int maxKillBubbles = 5;
+		// Killmail Bubbles
+		const int maxKillBubbles = 50;
 		private int numKillBubbles = 0;
+		private List<zkbApi.Killmail> killmails;
+		private DateTime currentkillTime;
+		private int killmailLastIdx = 0;
+		private int updateCounterBubbles = 1;
+		private const int updateCounterBubblesMax = 5;
 
 		// Faction IDs
 		private const int factionIdMin = 500000;
@@ -178,7 +187,11 @@ public class GenerateGalaxy : MonoBehaviour
 				// Paint solar systems with default color schema
 				PaintSystemsSec ();
 				ToogleDisplayFactionLabels (false);
-			
+
+				// read killmails and reset killtime
+				killmails = zkbApi.getKillsToday();
+				currentkillTime = killmails[0].killTime;
+
 				// Universe generation complete - starting background music
 				if (transform.gameObject.GetComponent<AudioSource>() != null) {
 						transform.gameObject.GetComponent<AudioSource>().Play ();
@@ -188,6 +201,10 @@ public class GenerateGalaxy : MonoBehaviour
 				if (playerController != null) {
 						playerController.transform.position = new Vector3 (-24.55f, 34.19f, 24.73f);
 				}
+
+				// start killtimer
+				int killTimeScale = 10;
+				StartCoroutine (killTimeCounter(killTimeScale));
 		}
 
 		/// <summary>
@@ -196,45 +213,82 @@ public class GenerateGalaxy : MonoBehaviour
 		public void Update ()
 		{
 				// check for A-Button
-
+				/*
 				if (Input.GetKeyDown (KeyCode.JoystickButton0)) 
 				{
 						if (numKillBubbles < maxKillBubbles) StartCoroutine ("startKillBubble");
 				}
-
+				*/
 
 				// Execute rotation adjustment of labels only every nth frame to save drawcalls
-				if (updateCounter == updateLabelRotationFrameCount) {	
+				if (updateCounter == updateLabelRotationFrameCount) 
+				{	
 						updateCounter = 1;	// reset counter
 						
 						// Adjust rotation of active labels so they are readible from the player camera
-						foreach (GameObject goLabel in labelShortlist.Values) {		
+						foreach (GameObject goLabel in labelShortlist.Values) 
+						{		
 								goLabel.transform.LookAt (playerController.transform, playerController.transform.up);
 								goLabel.transform.Rotate (0, 180, 0);		
-						}		
+						}
 				}
 				updateCounter++;
+
+				// Only perform every x frames
+				if (updateCounterBubbles == updateCounterBubblesMax) 
+				{	
+						updateCounterBubbles = 1;	// reset counter
+
+						if (killmails[killmailLastIdx].killTime < currentkillTime)
+						{
+								if (killmailLastIdx < killmails.Count - 1)
+								{
+									int solarSystemId = killmails[killmailLastIdx].solarSystemID;
+									if ( (solarSystemId < WH_SOLAR_SYSTEM_ID) &&  (numKillBubbles < maxKillBubbles)) StartCoroutine (startKillBubble(solarSystemId));
+									killmailLastIdx++;
+								}
+						}
+
+				}
+				updateCounterBubbles++;
 						
 		}
 
-		IEnumerator startKillBubble ()
+		IEnumerator killTimeCounter (int scale)
+		{
+			while (true)
+			{
+				currentkillTime = currentkillTime.AddSeconds(scale);
+				// Debug.Log (currentkillTime);
+				yield return new WaitForSeconds(1);
+			}
+		}
+
+		IEnumerator startKillBubble (int solarsystemId)
 		{
 				numKillBubbles++;
 
-				System.Random rnd = new System.Random();
+				// System.Random rnd = new System.Random();
 				float waitsecs = 0.02f;
-				float inc = 0.05f;
-				float radius = 0.1f * rnd.Next(10, 30);
-				int[] systems = {30000142, 30000145, 30000143, 30000143, 30000139, 30000144, 30000140};
+				float inc = 0.1f;
+				float radius = 0.1f * 30;
+				// int[] systems = {30000142, 30000145, 30000143, 30000143, 30000139, 30000144, 30000140};
+
+				// solarsystemId = 30000142;
 
 				// start kill bubble
-				int solarsystemId = systems[rnd.Next(0, 6)];
+				// int solarsystemId = systems[rnd.Next(0, 6)];
 				GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 				sphere.transform.position = solarSystems[solarsystemId].Position;	
 				sphere.transform.GetComponent<Renderer>().material = highlightKillsMat;
 				sphere.name = solarSystems[solarsystemId].SolarSystemName + "_killBubble";
 				AudioSource audio = sphere.AddComponent<AudioSource>() as AudioSource;
 				audio.clip = boom;
+				audio.spatialBlend = 1f;	// make this sound full 3D
+				audio.volume = 1f;
+				audio.minDistance = 10;
+				audio.rolloffMode = AudioRolloffMode.Logarithmic;
+				audio.maxDistance = 300;
 				audio.Play();
 				// store current sphere on stack for later retrieval
 				sphere.transform.parent = killBublles.transform;
@@ -246,20 +300,21 @@ public class GenerateGalaxy : MonoBehaviour
 					yield return new WaitForSeconds(waitsecs);
 				}
 
+				/*
 				// let audio clip play to end
 				while (audio.isPlaying)
 				{
 					yield return new WaitForSeconds(waitsecs);
 				}
+				*/
 
-				/*
 				// fade out sound
 				for (float v = 1f; v > 0f; v -= 0.1f)
 				{
 					audio.volume = v;
-					yield return new WaitForSeconds(waitsecs*2);
+					yield return new WaitForSeconds(waitsecs*7);
 				}
-				*/
+
 				audio.volume=0;
 				Destroy (sphere);
 				numKillBubbles--;
@@ -560,7 +615,7 @@ public class GenerateGalaxy : MonoBehaviour
 						// get data from csv file
 						int id = Convert.ToInt32 (sysgrid [2, i]); // get system ID
 			
-						if ((id > 0) && (id < 31000000)) { // exclude WH systems
+						if ((id > 0) && (id < WH_SOLAR_SYSTEM_ID)) { // exclude WH systems
 				
 								// get data from csv file
 								int regionId = Convert.ToInt32 (sysgrid [0, i]); // get region ID
