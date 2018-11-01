@@ -1,11 +1,12 @@
 ﻿/*
  * GenerateGalaxy.cs
  *
- * Copyright (C) 2015 Erik Kalkoken
+ * Copyright (C) 2015-18 Erik Kalkoken
  *
  * Generates all galaxy 3D objects in space at startup based on CCP's map data
  *
  * HISTORY
+ * 01-OCT-2018 v0.7.1 Fix: security of system now correctly formated to 0.0
  * 20-FEB-2016 v0.7.0 New: show details for system: jump/kills from last hour, security status
  * 18-FEB-2016 v0.6.1 Performance improvements by introducing static batching for all solar systen spheres
  * 13-DEC-2015 v0.1.0 Initial version
@@ -164,7 +165,7 @@ public class GenerateGalaxy : MonoBehaviour
 																
 				GenerateRegions ();
 				GenerateSolarSystems ();
-				// GenerateSystemStats ();
+				GenerateSystemStats ();
 				GenerateJumps ();
 				GenerateFactions ();
 
@@ -836,7 +837,7 @@ public class GenerateGalaxy : MonoBehaviour
 						{
 							Transform label = system.Trf.GetChild(0);
 							TextMesh textMesh = label.GetComponent<TextMesh>();
-							textMesh.text = system.SolarSystemName + " (" + system.Sec + ")";
+							textMesh.text = system.SolarSystemName + " (" + system.Sec.ToString("0.0") + ")";
 						}
 						highlightJumps.SetActive (false);		
 						highlightKills.SetActive (false);		

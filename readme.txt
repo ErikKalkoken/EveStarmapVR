@@ -1,10 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 ! Name: Eve Starmap VR
-! Version:	0.7.1
+! Version:	0.8.0
 ! System:	Windows PC with Oculus Rift
 ! Author:	Erik Kalkoken
 ----------------------------------------------------------------------------------------------------
 ! History:
+! 2018-11-01 v0.8.0 Change: Migrated to Esi API for fetching current system kills and jumps
 ! 2018-11-01 v0.7.1 Change: Migrated to Unity 2018.2.14f1, disabled dysfunctional EVE API access
 ! 2016-02-22 v0.7.0 New feature: Show current kills and jump per system
 ! 2016-02-18 v0.6.1 Performance improvements
