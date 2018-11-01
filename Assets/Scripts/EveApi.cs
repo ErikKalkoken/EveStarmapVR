@@ -6,29 +6,85 @@
  * Wrapper class for accessing the XML API of Eve Online
  *
  * HISTORY
+ * 01-NOV-2018 v0.3 Change: Migration to ESI API
  * 21-FEB-2016 v0.2 Improvements to getSystemStats method
  * 20-DEC-2015 v0.1 Initial version
  *
 **/
 
-using System.Xml;
-using System.Net;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+
+
+
+
 
 /// <summary>
 /// Wrapper class for accessing the XML API of Eve Online
 /// </summary>
 public static class EveApi
 {
-    const string eveXmlApiUrl = "https://api.eveonline.com";
-	enum SystemStatsType { kills, jumps };
+    const string eveEsiUrlSystemKills = "https://esi.evetech.net/v2/universe/system_kills/";
+    const string eveEsiUrlSystemJumps = "https://esi.evetech.net/v1/universe/system_jumps/";
+    enum SystemStatsType { kills, jumps };
 
-	/// <summary>
-	/// Disables validation of certificates for HTTPS since mono does not use the client CA
-	/// </summary>
+    [Serializable]
+    public class EveSystemKill
+    {
+        public int npc_kills;
+        public int pod_kills;
+        public int ship_kills;
+        public int system_id;
+    }
+
+    [Serializable]
+    public class EveSystemJump
+    {
+        public int ship_jumps;        
+        public int system_id;
+    }
+
+    public static class JsonHelper
+    {
+        public static T[] FromJson<T>(string json)
+        {
+            Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
+            return wrapper.Items;
+        }
+
+        public static string ToJson<T>(T[] array)
+        {
+            Wrapper<T> wrapper = new Wrapper<T>();
+            wrapper.Items = array;
+            return JsonUtility.ToJson(wrapper);
+        }
+
+        public static string ToJson<T>(T[] array, bool prettyPrint)
+        {
+            Wrapper<T> wrapper = new Wrapper<T>();
+            wrapper.Items = array;
+            return JsonUtility.ToJson(wrapper, prettyPrint);
+        }
+
+        [Serializable]
+        private class Wrapper<T>
+        {
+            public T[] Items;
+        }
+    }
+
+    public static string fixJson(string value)
+    {
+        value = "{\"Items\":" + value + "}";
+        return value;
+    }
+
+    /// <summary>
+    /// Disables validation of certificates for HTTPS since mono does not use the client CA
+    /// </summary>
     public static void initHttps()
     {
         System.Net.ServicePointManager.ServerCertificateValidationCallback +=
@@ -56,14 +112,63 @@ public static class EveApi
 	/// returns kills per system from last hour in Eve Online as <systemId, kills>
 	/// kills = shipsKills + podKills
 	/// </summary>
-	public static Dictionary<int, int> getKills () { return getSystemStats (SystemStatsType.kills);	}
+	public static Dictionary<int, int> getKills () 
+    {
+        Dictionary<int, int> systemDetails = new Dictionary<int, int>();
 
-	/// <summary>
-	/// returns jumps per system from last hour in Eve Online as <systemId, jumps>
-	/// </summary>
-	public static Dictionary<int, int> getJumps () { return getSystemStats (SystemStatsType.jumps);	}
+        try
+        {
+            WebClient client = new WebClient();
+            string getString = client.DownloadString(eveEsiUrlSystemKills);
 
-	/// <summary>
+            EveSystemKill[] systems = JsonHelper.FromJson<EveSystemKill>(fixJson(getString));
+
+            foreach (EveSystemKill system in systems)
+            {
+                int totalKills = system.pod_kills + system.ship_kills;
+                if (totalKills > 0)
+                {
+                    systemDetails.Add(system.system_id, totalKills);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.Log("Warnung: failed to fetch system kills from ESI - Exception: " + ex);
+        }
+
+        return systemDetails;
+    }
+
+    /// <summary>
+    /// returns jumps per system from last hour in Eve Online as <systemId, jumps>
+    /// </summary>
+    public static Dictionary<int, int> getJumps ()
+    {
+        Dictionary<int, int> systemDetails = new Dictionary<int, int>();
+
+        try
+        {
+            WebClient client = new WebClient();
+            string getString = client.DownloadString(eveEsiUrlSystemJumps);
+
+            EveSystemJump[] systems = JsonHelper.FromJson<EveSystemJump>(fixJson(getString));
+
+            foreach (EveSystemJump system in systems)
+            {                
+                systemDetails.Add(system.system_id, system.ship_jumps);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.Log("Warnung: failed to fetch system jumps from ESI - Exception: " + ex);
+        }
+
+        return systemDetails;
+    }
+
+    /*
+    /// <summary>
 	/// returns either jumps or kills from last hour in Eve Online as <systemId, detail>
 	/// kills = shipsKills + podKills
 	/// returns null on error
@@ -74,16 +179,9 @@ public static class EveApi
 		string url = "";
 		bool success = true;
 
-		if (type == SystemStatsType.kills)
-		{
-        	url = eveXmlApiUrl + "/map/kills.xml.aspx";
-			// url = "C:\\Users\\bji74\\Desktop\\kills.xml"; // for development
-		}
-		else
-		{
-			url = eveXmlApiUrl + "/map/jumps.xml.aspx";
-			// url = "C:\\Users\\bji74\\Desktop\\jumps.xml"; // for development
-		}				
+        url = (type == SystemStatsType.kills)
+            ? eveEsiUrlSystemKills
+            : eveEsiUrlSystemJumps;
 
 		// Debug.Log("Loading page from url " + url);
 
@@ -92,7 +190,9 @@ public static class EveApi
 
         try
         {
-            doc.Load(url);
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            var response = (HttpWebResponse)request.GetResponse();
+            var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
         }
         catch (Exception ex)
         {
@@ -103,47 +203,42 @@ public static class EveApi
         if (success)
 	    {
 	        // get list of items
-	        try
+	        
+	        XmlNodeList nodes = doc.DocumentElement.SelectNodes("/eveapi/result/rowset/row");
+	        foreach (XmlNode node in nodes)
 	        {
-	            XmlNodeList nodes = doc.DocumentElement.SelectNodes("/eveapi/result/rowset/row");
-	            foreach (XmlNode node in nodes)
-	            {
-	                XmlAttributeCollection row = node.Attributes;
+	            XmlAttributeCollection row = node.Attributes;
 	                                
-					int solarSystemID = 0, detail1 = 0, detail2 = 0;;
-	                foreach (XmlAttribute column in row)
-	                {
-	                    if (column.Name == "solarSystemID") solarSystemID = Convert.ToInt32(column.InnerText);
-	                    if (type == SystemStatsType.kills)
-	                   	{					 
-							if (column.Name == "shipKills") detail1 = Convert.ToInt32(column.InnerText);
-							if (column.Name == "podKills") detail2 = Convert.ToInt32(column.InnerText);
-						}
-						else
-						{
-							if (column.Name == "shipJumps") detail1 = Convert.ToInt32(column.InnerText);
-						}
-	                }
-					if (solarSystemID != 0) systemDetails.Add(solarSystemID, detail1 + detail2);
+				int solarSystemID = 0, detail1 = 0, detail2 = 0;;
+	            foreach (XmlAttribute column in row)
+	            {
+	                if (column.Name == "solarSystemID") solarSystemID = Convert.ToInt32(column.InnerText);
+	                if (type == SystemStatsType.kills)
+	                {					 
+						if (column.Name == "shipKills") detail1 = Convert.ToInt32(column.InnerText);
+						if (column.Name == "podKills") detail2 = Convert.ToInt32(column.InnerText);
+					}
+					else
+					{
+						if (column.Name == "shipJumps") detail1 = Convert.ToInt32(column.InnerText);
+					}
 	            }
+				if (solarSystemID != 0) systemDetails.Add(solarSystemID, detail1 + detail2);
 	        }
-	        catch (Exception ex)
-	        {
-				ErrorOccured("Could not extract items from xml file", ex);
-				success = false;
-	        }
+	        
 		}
 
 		if (success) return systemDetails;
 		else return null;
     }
+    */
 
-	/// <summary>
-	/// returns the top systems in desending order as dictionary
-	/// systemDetails: list of systemDetails to process
-	/// max: max number of systems the list should contain
-	/// </summary>
-	public static Dictionary<int, int> getTop (Dictionary<int, int> systemDetails, int max)
+    /// <summary>
+    /// returns the top systems in desending order as dictionary
+    /// systemDetails: list of systemDetails to process
+    /// max: max number of systems the list should contain
+    /// </summary>
+    public static Dictionary<int, int> getTop (Dictionary<int, int> systemDetails, int max)
 	{
 		Dictionary<int, int> result = new  Dictionary<int, int>();
 		int counter = 0;
@@ -175,4 +270,5 @@ public static class EveApi
     {
         Debug.LogError("Error occured: " + text + " Exception: " + ex);
     }
+
 }
