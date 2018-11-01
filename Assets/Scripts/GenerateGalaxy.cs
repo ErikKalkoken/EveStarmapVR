@@ -164,7 +164,7 @@ public class GenerateGalaxy : MonoBehaviour
 																
 				GenerateRegions ();
 				GenerateSolarSystems ();
-				GenerateSystemStats ();
+				// GenerateSystemStats ();
 				GenerateJumps ();
 				GenerateFactions ();
 
