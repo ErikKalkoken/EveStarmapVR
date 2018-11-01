@@ -16,9 +16,9 @@ public class StartupScreen : MonoBehaviour {
 	{
 
 		// Recenter VR display
-		if ( Input.GetButton ("BackButton") && VRDevice.isPresent )
+		if ( Input.GetButton ("BackButton") && UnityEngine.XR.XRDevice.isPresent )
 		{
-			InputTracking.Recenter();
+			UnityEngine.XR.InputTracking.Recenter();
 		}
 								
 			

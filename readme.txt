@@ -1,10 +1,11 @@
 ---------------------------------------------------------------------------------------------------
-! Name: Eve Galaxy Viewer
-! Version:	0.7.0
-! System:	Windows PC with Oculus Rift DK2
+! Name: Eve Starmap VR
+! Version:	0.7.1
+! System:	Windows PC with Oculus Rift
 ! Author:	Erik Kalkoken
 ----------------------------------------------------------------------------------------------------
 ! History:
+! 2018-11-01 v0.7.1 Change: Migrated to Unity 2018.2.14f1, disabled dysfunctional EVE API access
 ! 2016-02-22 v0.7.0 New feature: Show current kills and jump per system
 ! 2016-02-18 v0.6.1 Performance improvements
 ! 2016-02-17 v0.6.0 Migrated to Unity 5 and SDK 0.8.0
@@ -75,7 +76,7 @@ B-Button		Close the option menu
 ----------------------------------------------
 The demo has been build with performance in mind and is running with smooth 75Hz most of the time on the reference system. 
 
-Please be aware though that judder will most likely occur in situation with very high amount of objects, e.g. when displaying the complete universe with all 7.500+ solar systems and 14.000+ jump connections on screen.
+Please be aware though that judder will most likely occur in situation with very high amount of objects, e.g. when zooming out and displaying the complete universe with all 7.500+ solar systems and 14.000+ jump connections on screen.
 
 While generating the galaxy on startup the screen will freeze. This is normal behavior - just wait a few seconds until the galaxy is ready. This takes about 5-6 seconds on the reference system.
 
@@ -84,10 +85,9 @@ While generating the galaxy on startup the screen will freeze. This is normal be
 For reference this demo has been developed and tested with the following system configuration:
 - Windows 7 64-Bit
 - Intel i7-4770K, 16 GB RAM
-- Oculus Rift DK2
+- Oculus Rift CV 1
 - NVIDIA GTX 970
-- Oculus PC SDK 0.8.0 Beta
-- Unity 5.3.2 Personal Edition
+- Unity 2018.2.14f1 Personal Edition
 
 6. Sources
 ----------------------------------------------
@@ -99,9 +99,9 @@ Music - "CYAN 010 | Smooth Genestar - The Source" by CYAN MUSIC. It can be found
 All data used in this demo belongs to CCP and is used in accordance to the "Developer License Agreement" as defined on https://developers.eveonline.com/resource/license-agreement.
 For the data the following applies: © 2014 CCP hf. All rights reserved. "EVE", "EVE Online", "CCP", and all related logos and images are trademarks or registered trademarks of CCP hf. 
 
-The music is licenced under CC BY NC SA. Please see link for licence details: http://creativecommons.org/licenses/by-nc-nd/3.0/
+The music is licensed under CC BY NC SA. Please see link for licence details: http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-This application is licende under the MIT licence - with the exception of material owned by CCP and CYAN MUSIC as mentioned above. See attache licence file for details.
+This application is licensed under the MIT license - with the exception of material owned by CCP and CYAN MUSIC as mentioned above. See attached license file for details.
 
 
 8. Contact
